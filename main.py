@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import cmd
 import sys
-from clumsy import evaluate, parse
+from clumsy import tokenize, parse, evaluate
 
 
 class Cmd(cmd.Cmd):
@@ -15,7 +15,7 @@ class Cmd(cmd.Cmd):
                 print()
 
     def default(self, line):
-        print(evaluate(parse(line)))
+        print(evaluate(parse(tokenize(line))))
 
     def do_help(self, arg):
         self.default('help ' + arg)
