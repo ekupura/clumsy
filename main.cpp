@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 
+#include <boost/spirit/include/support_utree.hpp>
 #include <readline/history.h>
 #include <readline/readline.h>
 
@@ -14,15 +15,16 @@ auto readline_string(char const * const prompt) -> std::string const;
 auto readline_string(char const * const prompt) -> std::string const {
     char * const input = readline(prompt);
     if (input == nullptr) throw std::runtime_error("Got EOF");
-    std::string const result(input);
+    auto const result = std::string(input) + '\n';
     add_history(input);
     std::free(input);
     return result;
 }
 
 int main(void) {
-    clumsy_parser<std::string::const_iterator> parser;
+    clumsy_parser<std::string::const_iterator, boost::spirit::utree> parser;
     std::string input;
+    boost::spirit::utree result;
 
     while (true) {
         try {
@@ -31,8 +33,11 @@ int main(void) {
             break;
         }
 
-        auto const feeded = parser.parse(input.begin(), input.end());
+        auto const feeded = parser.parse(input.begin(), input.end(), result);
         if (feeded != input.cend()) continue;
+        std::cout << result << std::endl;
+
         input.erase(input.cbegin(), input.cend());
+        result.erase(result.begin(), result.end());
     }
 }
