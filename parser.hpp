@@ -22,28 +22,27 @@ struct skipper_grammar : qi::grammar<Iterator> {
 
 template <typename Iterator, typename Result = spirit::utree::list_type(), typename Skipper = skipper_grammar<Iterator>>
 struct clumsy_grammar : qi::grammar<Iterator, Result, Skipper> {
+    using result_type = Result;
+    using identifier_type = spirit::utree();
+
     clumsy_grammar() : clumsy_grammar::base_type(start) {
-        start      = *expression;
-        expression = identifier | ( '(' >> ( lambda | define | apply | identifier ) >> ')' );
-        identifier = qi::lexeme[qi::alpha >> *qi::alnum];
-        lambda     = "lambda" >> identifier >> expression;
-        define     = "define" >> identifier >> expression;
-        apply      = expression >> expression;
+        start      = *list;
+        list       = '(' >> +(list | identifier) >> ')';
+        identifier = qi::as_string[+qi::alnum];
     }
 
-    qi::rule<Iterator, Result, Skipper> start;
-    qi::rule<Iterator, Result, Skipper> expression;
-    qi::rule<Iterator, Result, Skipper> identifier;
-    qi::rule<Iterator, Result, Skipper> lambda;
-    qi::rule<Iterator, Result, Skipper> define;
-    qi::rule<Iterator, Result, Skipper> apply;
+    qi::rule<Iterator, result_type, Skipper> start;
+    qi::rule<Iterator, result_type, Skipper> list;
+    qi::rule<Iterator, identifier_type> identifier;
 };
 
 
-template <typename Iterator, typename Result>
+template <typename Iterator>
 struct clumsy_parser {
-    auto parse(Iterator begin, Iterator end, Result & result) {
-        Iterator const former_begin = begin;
+    using result_type = spirit::utree;
+
+    auto parse(Iterator begin, Iterator end, result_type & result) {
+        auto const former_begin = begin;
 
         auto const succeed = qi::phrase_parse(begin, end, grammar, skipper, result);
         if (!succeed) return former_begin;

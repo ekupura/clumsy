@@ -4,7 +4,6 @@
 
 #include <cstdlib>
 
-#include <boost/spirit/include/support_utree.hpp>
 #include <readline/history.h>
 #include <readline/readline.h>
 
@@ -22,9 +21,9 @@ auto readline_string(char const * const prompt) -> std::string const {
 }
 
 int main(void) {
-    clumsy_parser<std::string::const_iterator, boost::spirit::utree> parser;
+    clumsy_parser<std::string::const_iterator> parser;
     std::string input;
-    boost::spirit::utree result;
+    decltype(parser)::result_type result;
 
     while (true) {
         try {
