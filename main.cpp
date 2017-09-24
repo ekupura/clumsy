@@ -32,7 +32,7 @@ int main(void) {
             break;
         }
 
-        auto const feeded = parser.parse(input.begin(), input.end(), result);
+        auto const feeded = parser.parse(input.begin(), input.cend(), result);
         if (feeded != input.cend()) continue;
         std::cout << result << std::endl;
 
