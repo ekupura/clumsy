@@ -4,17 +4,18 @@
 
 #include <cstdlib>
 
+#include <boost/optional.hpp>
 #include <readline/history.h>
 #include <readline/readline.h>
 
 #include "parser.hpp"
 
-auto readline_string(char const * const prompt) -> std::string const;
+auto readline_string(char const * const prompt) -> boost::optional<std::string> const;
 
-auto readline_string(char const * const prompt) -> std::string const {
-    char * const input = readline(prompt);
-    if (input == nullptr) throw std::runtime_error("Got EOF");
-    auto const result = std::string(input) + '\n';
+auto readline_string(char const * const prompt) -> boost::optional<std::string> const {
+    auto const input = readline(prompt);
+    if (input == nullptr) return boost::none;
+    auto result = std::string(input);
     add_history(input);
     std::free(input);
     return result;
@@ -26,11 +27,9 @@ int main(void) {
     decltype(parser)::result_type result;
 
     while (true) {
-        try {
-            input.append(readline_string(input.size() == 0 ? ">>> " : "... "));
-        } catch (std::runtime_error e) {
-            break;
-        }
+        auto const line = readline_string(input.size() == 0 ? ">>> " : "... ");
+        if (!line) break;
+        input.append(line.get() + '\n');
 
         auto const feeded = parser.parse(input.begin(), input.cend(), result);
         if (feeded != input.cend()) continue;
