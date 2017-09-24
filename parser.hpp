@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 
+#include <boost/optional.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_utree.hpp>
 
@@ -41,12 +42,12 @@ template <typename Iterator>
 struct clumsy_parser {
     using result_type = spirit::utree;
 
-    auto parse(Iterator begin, Iterator end, result_type & result) {
-        auto const former_begin = begin;
+    auto parse(Iterator begin, Iterator const & end) -> boost::optional<result_type> const {
+        result_type result;
 
         auto const succeed = qi::phrase_parse(begin, end, grammar, skipper, result);
-        if (!succeed) return former_begin;
-        return begin;
+        if (!succeed || begin != end) return boost::none;
+        return result;
     }
 
     clumsy_grammar<Iterator> grammar;
