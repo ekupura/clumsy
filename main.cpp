@@ -9,6 +9,7 @@
 #include <readline/readline.h>
 
 #include "parser.hpp"
+#include "eval.hpp"
 
 auto readline_string(char const * const prompt) -> boost::optional<std::string> const;
 
@@ -36,3 +37,5 @@ int main(void) {
         input.erase(input.begin(), input.end());
     }
 }
+
+// vim: set ts=4 sw=4 et:

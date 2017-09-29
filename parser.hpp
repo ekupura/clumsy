@@ -1,8 +1,6 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
-#include <stdexcept>
-
 #include <boost/optional.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_utree.hpp>
@@ -47,6 +45,7 @@ struct clumsy_parser {
 
         auto const succeed = qi::phrase_parse(begin, end, grammar, skipper, result);
         if (!succeed || begin != end) return boost::none;
+
         return result;
     }
 
@@ -55,3 +54,4 @@ struct clumsy_parser {
 };
 
 #endif  // PARSER_HPP
+// vim: set ts=4 sw=4 et:
