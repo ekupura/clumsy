@@ -22,17 +22,41 @@ struct skipper_grammar : qi::grammar<Iterator> {
 template <typename Iterator, typename Result = spirit::utree::list_type(), typename Skipper = skipper_grammar<Iterator>>
 struct clumsy_grammar : qi::grammar<Iterator, Result, Skipper> {
     using result_type = Result;
-    using identifier_type = spirit::utree();
 
     clumsy_grammar() : clumsy_grammar::base_type(start) {
-        start      = *list;
-        list       = '(' >> +(list | identifier) >> ')';
-        identifier = qi::as_string[+qi::alnum];
+        // program is a list of definitions or expressions
+        start      = *( define | expression );
+
+        // identifier is a continuous sequence of alphabet or number
+        identifier = qi::as_string[qi::lexeme[+qi::alnum]];
+
+        // expression is an identifier, function expression or function application, or a parenthesized expression
+        expression = identifier | lambda | apply | '(' >> expression >> ')';
+
+        // definition is a parenthesized pair of identifier and expression following 'define' keyword
+        define     = '(' >> qi::lit("define") >> identifier >> expression >> ')';
+
+        // function expression is a parenthesized pair of patameters and expression following 'lambda' keyword
+        lambda     = '(' >> qi::lit("lambda") >> parameters >> expression >> ')';
+
+        // function application is a parenthesized pair of expression and arguments
+        apply      = '(' >>                      expression >> arguments  >> ')';
+
+        // parameters is an identifier or parenthesized list of identifiers
+        parameters = identifier | '(' >> +identifier >> ')';
+
+        // arguments is list of expression
+        arguments  = +expression;
     }
 
     qi::rule<Iterator, result_type, Skipper> start;
-    qi::rule<Iterator, result_type, Skipper> list;
-    qi::rule<Iterator, identifier_type> identifier;
+    qi::rule<Iterator, spirit::utree(), Skipper> identifier;
+    qi::rule<Iterator, spirit::utree(), Skipper> expression;
+    qi::rule<Iterator, spirit::utree::list_type(), Skipper> define;
+    qi::rule<Iterator, spirit::utree::list_type(), Skipper> lambda;
+    qi::rule<Iterator, spirit::utree::list_type(), Skipper> apply;
+    qi::rule<Iterator, spirit::utree::list_type(), Skipper> parameters;
+    qi::rule<Iterator, spirit::utree::list_type(), Skipper> arguments;
 };
 
 
